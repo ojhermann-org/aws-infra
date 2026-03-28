@@ -11,5 +11,8 @@ override.tf.json
 crash.log
 crash.*.log
 
+# direnv
+.direnv/
+
 # OS
 .DS_Store
