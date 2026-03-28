@@ -1,0 +1,35 @@
+name: Apply
+
+on:
+  workflow_dispatch:
+    inputs:
+      directory:
+        description: "Directory to apply (e.g. management, dev, stage, prod)"
+        required: true
+        default: management
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::324621155013:role/github-actions-apply
+          aws-region: us-east-1
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+      - name: init
+        run: tofu init
+        working-directory: ${{ inputs.directory }}
+      - name: plan
+        run: tofu plan -input=false -out=tfplan
+        working-directory: ${{ inputs.directory }}
+      - name: apply
+        run: tofu apply -input=false tfplan
+        working-directory: ${{ inputs.directory }}
