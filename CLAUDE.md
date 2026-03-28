@@ -23,10 +23,10 @@ Root (ojhermann-org)
 ├── Management account (324621155013)  — governance only, no workloads
 └── Workloads OU
     ├── SDLC OU
-    │   ├── Dev account
-    │   └── Stage account
+    │   ├── Dev account (916868258956)
+    │   └── Stage account (039914330850)
     └── Prod OU
-        └── Prod account
+        └── Prod account (425924866611)
 ```
 
 Within each workload account: one VPC per service.
@@ -36,9 +36,9 @@ Within each workload account: one VPC per service.
 | Profile | Account | Purpose |
 |---------|---------|---------|
 | `otto-management` | 324621155013 | Org governance, account creation |
-| `otto-dev` | TBD | Dev workloads |
-| `otto-stage` | TBD | Stage workloads |
-| `otto-prod` | TBD | Prod workloads |
+| `otto-dev` | 916868258956 | Dev workloads |
+| `otto-stage` | 039914330850 | Stage workloads |
+| `otto-prod` | 425924866611 | Prod workloads |
 
 ## Identity and access
 
@@ -119,9 +119,9 @@ Guidelines:
 - [x] Confirm AWS Organization exists (`o-3b7bm2b2yf`), feature set ALL
 - [x] Tag org root with `Name=ojhermann-org`
 - [x] Set up AWS Budget alert on management account (created manually as `ojhermann-monthly-budget`; import into `management/` via `tofu import` once that directory is set up)
-- [ ] Create S3 state bucket and DynamoDB lock table (`bootstrap/`)
-- [ ] Create OU structure (Workloads → SDLC, Prod) (`management/`)
-- [ ] Create member accounts (dev, stage, prod) (`management/`)
+- [x] Create S3 state bucket and DynamoDB lock table (`bootstrap/`)
+- [x] Create OU structure (Workloads → SDLC, Prod) (`management/`)
+- [x] Create member accounts (dev, stage, prod) (`management/`)
 - [ ] Assign `admins` group + `AdministratorAccess` to each member account
 - [ ] Configure CLI profiles for each member account
 - [ ] Begin managing workload resources per account
