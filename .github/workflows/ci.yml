@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+      - name: Check formatting
+        run: tofu fmt -check -recursive
+
+  trivy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for misconfigurations
+        uses: aquasecurity/trivy-action@0.31.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+          hide-progress: true
+
+  # bootstrap/ is intentionally excluded from CI — it uses local state and is
+  # run once manually. Add new account directories here as they are created.
+  plan:
+    needs: [fmt, trivy]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        directory: [management]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::324621155013:role/github-actions-plan
+          aws-region: us-east-1
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: latest
+      - name: init
+        run: tofu init
+        working-directory: ${{ matrix.directory }}
+      - name: validate
+        run: tofu validate
+        working-directory: ${{ matrix.directory }}
+      - name: plan
+        run: tofu plan -input=false
+        working-directory: ${{ matrix.directory }}
