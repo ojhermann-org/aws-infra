@@ -118,10 +118,11 @@ Guidelines:
 - [x] Verify CLI access (`aws sts get-caller-identity --profile otto-management`)
 - [x] Confirm AWS Organization exists (`o-3b7bm2b2yf`), feature set ALL
 - [x] Tag org root with `Name=ojhermann-org`
-- [x] Set up AWS Budget alert on management account (created manually as `ojhermann-monthly-budget`; import into `management/` via `tofu import` once that directory is set up)
+- [x] Set up AWS Budget alert on management account (created manually as `monthly-budget`; imported into `management/`)
 - [x] Create S3 state bucket and DynamoDB lock table (`bootstrap/`)
 - [x] Create OU structure (Workloads → SDLC, Prod) (`management/`)
 - [x] Create member accounts (dev, stage, prod) (`management/`)
-- [ ] Assign `admins` group + `AdministratorAccess` to each member account
-- [ ] Configure CLI profiles for each member account
+- [x] Assign `admins` group + `AdministratorAccess` to each member account
+- [x] Configure CLI profiles for each member account
+- [x] Import budget into `management/`
 - [ ] Begin managing workload resources per account
