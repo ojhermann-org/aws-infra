@@ -56,5 +56,5 @@ jobs:
         run: tofu validate
         working-directory: ${{ matrix.directory }}
       - name: plan
-        run: tofu plan -input=false
+        run: tofu plan -input=false -lock=false
         working-directory: ${{ matrix.directory }}
