@@ -1,0 +1,5 @@
+# AWS-0132: S3 bucket not encrypted with a customer managed key (CMK).
+# The state bucket uses SSE-S3 (AES256), which is sufficient for a personal
+# project. A KMS CMK would add cost and operational overhead without
+# meaningful security benefit here.
+AVD-AWS-0132

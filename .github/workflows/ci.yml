@@ -27,6 +27,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "1"
           hide-progress: true
+          trivyignores: .trivyignore
 
   # bootstrap/ is intentionally excluded from CI — it uses local state and is
   # run once manually. Add new account directories here as they are created.
