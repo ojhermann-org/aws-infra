@@ -25,6 +25,8 @@ resource "aws_instance" "jump_box" {
   user_data_replace_on_change = true
 
   # Install Nix via Determinate Systems installer (daemon mode, flakes enabled by default).
+  # The installer creates /etc/profile.d/nix.sh which sources nix-daemon.sh at login,
+  # so nix is on PATH for all login shells without any .bashrc modifications.
   # Home Manager is applied separately by the user via ojhermann-org/home-manager.
   # A 2 GiB swapfile is created to guard against OOM during Nix builds.
   user_data = base64encode(<<-EOT
@@ -32,10 +34,6 @@ resource "aws_instance" "jump_box" {
     set -euo pipefail
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
       | sh -s -- install --no-confirm
-    # SSM sessions are non-login shells and don't source /etc/profile.d/, so Nix
-    # would not be on PATH without this. Sourcing nix-daemon.sh in .bashrc fixes it.
-    echo 'source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
-      >> /home/ec2-user/.bashrc
     # Create a 2 GiB swapfile as a safety net for memory spikes during Nix builds.
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
