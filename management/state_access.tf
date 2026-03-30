@@ -29,24 +29,3 @@ resource "aws_s3_bucket_policy" "state_cross_account" {
   bucket = "ojhermann-tofu-state"
   policy = data.aws_iam_policy_document.state_bucket_cross_account.json
 }
-
-resource "aws_dynamodb_resource_policy" "locks_cross_account" {
-  resource_arn = "arn:aws:dynamodb:us-east-1:324621155013:table/ojhermann-tofu-locks"
-
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Sid    = "MemberAccountLockAccess"
-      Effect = "Allow"
-      Principal = {
-        AWS = [for id in local.member_account_ids : "arn:aws:iam::${id}:root"]
-      }
-      Action = [
-        "dynamodb:GetItem",
-        "dynamodb:PutItem",
-        "dynamodb:DeleteItem",
-      ]
-      Resource = "arn:aws:dynamodb:us-east-1:324621155013:table/ojhermann-tofu-locks"
-    }]
-  })
-}
