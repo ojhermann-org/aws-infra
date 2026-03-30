@@ -96,3 +96,22 @@ resource "aws_iam_role_policy_attachment" "github_actions_plan_readonly" {
   role       = aws_iam_role.github_actions_plan.name
   policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
 }
+
+# Allows the plan role to assume shared-jump-box-role in each member account
+# so that tofu plan can run against dev, stage, and prod in CI.
+data "aws_iam_policy_document" "github_actions_plan_assume_member_roles" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    resources = [
+      "arn:aws:iam::${aws_organizations_account.dev.id}:role/shared-jump-box-role",
+      "arn:aws:iam::${aws_organizations_account.stage.id}:role/shared-jump-box-role",
+      "arn:aws:iam::${aws_organizations_account.prod.id}:role/shared-jump-box-role",
+    ]
+  }
+}
+
+resource "aws_iam_role_policy" "github_actions_plan_assume_member_roles" {
+  name   = "assume-member-account-roles"
+  role   = aws_iam_role.github_actions_plan.name
+  policy = data.aws_iam_policy_document.github_actions_plan_assume_member_roles.json
+}
