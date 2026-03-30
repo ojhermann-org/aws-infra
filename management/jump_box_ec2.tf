@@ -27,13 +27,18 @@ resource "aws_instance" "jump_box" {
   # Install Nix via Determinate Systems installer (daemon mode, flakes enabled by default).
   # The installer creates /etc/profile.d/nix.sh which sources nix-daemon.sh at login,
   # so nix is on PATH for all login shells without any .bashrc modifications.
-  # Home Manager is applied separately by the user via ojhermann-org/home-manager.
+  # Home Manager is applied as ec2-user so the user environment is fully configured
+  # on first boot — no manual steps needed on new instances.
   # A 2 GiB swapfile is created to guard against OOM during Nix builds.
   user_data = base64encode(<<-EOT
     #!/bin/bash
     set -euo pipefail
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
       | sh -s -- install --no-confirm
+    # Apply Home Manager as ec2-user in a login shell so nix is on PATH via
+    # /etc/profile.d/nix.sh. This fully configures the user environment on first boot.
+    sudo -u ec2-user bash -lc \
+      'nix run home-manager/master -- switch --flake github:ojhermann-org/home-manager#otto@x86_64-linux --refresh'
     # Create a 2 GiB swapfile as a safety net for memory spikes during Nix builds.
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
