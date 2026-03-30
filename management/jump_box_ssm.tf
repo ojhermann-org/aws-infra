@@ -27,6 +27,9 @@ resource "aws_ssm_document" "session_preferences" {
       cloudWatchStreamingEnabled  = true
       runAsEnabled                = true
       runAsDefaultUser            = "ec2-user"
+      shellProfile = {
+        linux = "exec bash -l"
+      }
     }
   })
 

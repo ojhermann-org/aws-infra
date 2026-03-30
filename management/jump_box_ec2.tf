@@ -26,6 +26,7 @@ resource "aws_instance" "jump_box" {
 
   # Install Nix via Determinate Systems installer (daemon mode, flakes enabled by default).
   # Home Manager is applied separately by the user via ojhermann-org/home-manager.
+  # A 2 GiB swapfile is created to guard against OOM during Nix builds.
   user_data = base64encode(<<-EOT
     #!/bin/bash
     set -euo pipefail
@@ -35,6 +36,12 @@ resource "aws_instance" "jump_box" {
     # would not be on PATH without this. Sourcing nix-daemon.sh in .bashrc fixes it.
     echo 'source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
       >> /home/ec2-user/.bashrc
+    # Create a 2 GiB swapfile as a safety net for memory spikes during Nix builds.
+    fallocate -l 2G /swapfile
+    chmod 600 /swapfile
+    mkswap /swapfile
+    swapon /swapfile
+    echo '/swapfile none swap sw 0 0' >> /etc/fstab
   EOT
   )
 
