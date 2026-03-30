@@ -27,6 +27,7 @@ args = ["--args=-recursive"]
 
 [[repos.hooks]]
 id = "terraform_validate"
+env = {AWS_PROFILE = "otto-management"}
 
 [[repos]]
 repo = "https://github.com/gitleaks/gitleaks"
