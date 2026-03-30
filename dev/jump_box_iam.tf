@@ -1,11 +1,13 @@
-# Allows the management account jump box to assume this role.
+# Allows any principal in the management account with sts:AssumeRole permission
+# to assume this role. This covers both the EC2 jump box instance profile and
+# management account SSO users running tofu locally.
 data "aws_iam_policy_document" "jump_box_trust" {
   statement {
     actions = ["sts:AssumeRole"]
 
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::324621155013:role/shared-jump-box-management"]
+      identifiers = ["arn:aws:iam::324621155013:root"]
     }
   }
 }
