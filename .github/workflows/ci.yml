@@ -39,7 +39,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        directory: [management]
+        directory: [management, dev, stage, prod]
     steps:
       - uses: actions/checkout@v4
       - uses: aws-actions/configure-aws-credentials@v4

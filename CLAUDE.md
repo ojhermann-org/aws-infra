@@ -146,6 +146,7 @@ Guidelines:
 - Modules in `modules/` for anything used in more than one place
 - Run `tofu fmt` before committing
 - Update this file whenever conventions, structure, or account details change
+- Keep CI in sync with the repo: when a new account directory is added, add it to the `plan` matrix in `.github/workflows/ci.yml`
 
 ## Bootstrap sequence
 
