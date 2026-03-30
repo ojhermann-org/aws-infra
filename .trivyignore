@@ -3,3 +3,9 @@
 # project. A KMS CMK would add cost and operational overhead without
 # meaningful security benefit here.
 AVD-AWS-0132
+
+# AWS-0009: Instance has a public IP address.
+# The jump box requires a public IP for outbound connectivity to SSM endpoints.
+# The security group has no inbound rules, so the instance is unreachable from
+# the internet.
+AVD-AWS-0009
