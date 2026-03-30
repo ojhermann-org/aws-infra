@@ -38,6 +38,8 @@ resource "aws_instance" "jump_box" {
     useradd -m -s /bin/bash otto
     echo 'otto ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/otto
     chmod 440 /etc/sudoers.d/otto
+    # Remove skeleton dotfiles so Home Manager can manage them without conflict.
+    rm -f /home/otto/.bash_profile /home/otto/.bashrc
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
       | sh -s -- install --no-confirm
     # Apply Home Manager as otto in a login shell so nix is on PATH via
