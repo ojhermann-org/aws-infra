@@ -60,7 +60,7 @@ The instance has an IAM instance profile (`shared-jump-box-management`) with:
 - `AdministratorAccess` on the management account
 - `sts:AssumeRole` into `shared-jump-box-role` in each member account
 
-Sessions run as `ec2-user` and are logged to CloudWatch (`/ssm/jump-box-sessions`, 90-day retention).
+Sessions run as `otto` and are logged to CloudWatch (`/ssm/jump-box-sessions`, 90-day retention).
 
 Nix is installed at first launch (Determinate Systems installer, daemon mode, flakes enabled). Apply `ojhermann-org/home-manager` on first login to complete the environment setup.
 
