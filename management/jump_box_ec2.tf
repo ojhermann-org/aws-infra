@@ -14,11 +14,13 @@ data "aws_ami" "al2023" {
 }
 
 resource "aws_instance" "jump_box" {
-  ami                         = data.aws_ami.al2023.id
-  instance_type               = "t3.micro"
-  subnet_id                   = aws_subnet.management_public.id
-  vpc_security_group_ids      = [aws_security_group.jump_box.id]
-  iam_instance_profile        = aws_iam_instance_profile.jump_box.name
+  ami                    = data.aws_ami.al2023.id
+  instance_type          = "t3.micro"
+  subnet_id              = aws_subnet.management_public.id
+  vpc_security_group_ids = [aws_security_group.jump_box.id]
+  iam_instance_profile   = aws_iam_instance_profile.jump_box.name
+  # trivy:ignore:AVD-AWS-0009 - public IP is for outbound SSM connectivity only;
+  # the security group has no inbound rules so the instance is unreachable from the internet.
   associate_public_ip_address = true
 
   # Install Nix via Determinate Systems installer (daemon mode, flakes enabled by default).
