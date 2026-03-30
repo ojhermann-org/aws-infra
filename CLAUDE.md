@@ -20,7 +20,7 @@ Default region: **us-east-1**. All resources use this region unless there is an 
 
 ```
 Root (ojhermann-org)
-├── Management account (324621155013)  — governance only, no workloads
+├── Management account (324621155013)  — governance + operational tooling (jump box)
 └── Workloads OU
     ├── SDLC OU
     │   ├── Dev account (916868258956)
@@ -42,11 +42,48 @@ Within each workload account: one VPC per service.
 
 ## Identity and access
 
-- **IAM Identity Center** (not IAM users) is the identity layer
+- **IAM Identity Center** (not IAM users) is the identity layer for human access
 - User `otto` is a member of the `admins` group
 - `admins` group has `AdministratorAccess` permission set assigned per account
 - CLI auth via `aws sso login --profile <profile>`
 - Root account credentials are not used after initial setup
+
+### Jump box access
+
+An EC2 instance (`shared-jump-box-management`) in the management account provides persistent multi-account CLI access without SSO browser auth. Access via SSM Session Manager:
+
+```bash
+aws ssm start-session --target <instance-id> --profile otto-management
+```
+
+The instance has an IAM instance profile (`shared-jump-box-management`) with:
+- `AdministratorAccess` on the management account
+- `sts:AssumeRole` into `shared-jump-box-role` in each member account
+
+Sessions run as `ec2-user` and are logged to CloudWatch (`/ssm/jump-box-sessions`, 90-day retention).
+
+Nix is installed at first launch (Determinate Systems installer, daemon mode, flakes enabled). Apply `ojhermann-org/home-manager` on first login to complete the environment setup.
+
+Configure `~/.aws/config` on the jump box:
+
+```ini
+[profile otto-management]
+credential_source = Ec2InstanceMetadata
+
+[profile otto-dev]
+role_arn = arn:aws:iam::916868258956:role/shared-jump-box-role
+source_profile = otto-management
+
+[profile otto-stage]
+role_arn = arn:aws:iam::039914330850:role/shared-jump-box-role
+source_profile = otto-management
+
+[profile otto-prod]
+role_arn = arn:aws:iam::425924866611:role/shared-jump-box-role
+source_profile = otto-management
+```
+
+Then use `export AWS_PROFILE=otto-dev` (or direnv) to switch accounts within a session.
 
 ## State management
 
@@ -125,4 +162,7 @@ Guidelines:
 - [x] Assign `admins` group + `AdministratorAccess` to each member account
 - [x] Configure CLI profiles for each member account
 - [x] Import budget into `management/`
+- [x] Deploy jump box EC2 in management account with SSM access (`management/`)
+- [x] Create cross-account IAM roles in member accounts (`dev/`, `stage/`, `prod/`)
+- [ ] Configure `~/.aws/config` on jump box (manual, see Identity and access section)
 - [ ] Begin managing workload resources per account
