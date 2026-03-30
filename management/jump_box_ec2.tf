@@ -22,6 +22,7 @@ resource "aws_instance" "jump_box" {
   # trivy:ignore:AVD-AWS-0009 - public IP is for outbound SSM connectivity only;
   # the security group has no inbound rules so the instance is unreachable from the internet.
   associate_public_ip_address = true
+  user_data_replace_on_change = true
 
   # Install Nix via Determinate Systems installer (daemon mode, flakes enabled by default).
   # Home Manager is applied separately by the user via ojhermann-org/home-manager.
@@ -30,6 +31,10 @@ resource "aws_instance" "jump_box" {
     set -euo pipefail
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
       | sh -s -- install --no-confirm
+    # SSM sessions are non-login shells and don't source /etc/profile.d/, so Nix
+    # would not be on PATH without this. Sourcing nix-daemon.sh in .bashrc fixes it.
+    echo 'source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh' \
+      >> /home/ec2-user/.bashrc
   EOT
   )
 
