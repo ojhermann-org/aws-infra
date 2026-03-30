@@ -33,9 +33,13 @@ resource "aws_instance" "jump_box" {
   user_data = base64encode(<<-EOT
     #!/bin/bash
     set -euo pipefail
-    # Create otto user (matches home-manager config) with sudo access.
+    # Create otto user (matches home-manager config) with passwordless sudo.
+    # AL2023 wheel requires a password; a sudoers.d entry is needed for NOPASSWD.
     useradd -m -s /bin/bash otto
-    usermod -aG wheel otto
+    echo 'otto ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/otto
+    chmod 440 /etc/sudoers.d/otto
+    # Remove skeleton dotfiles so Home Manager can manage them without conflict.
+    rm -f /home/otto/.bash_profile /home/otto/.bashrc
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
       | sh -s -- install --no-confirm
     # Apply Home Manager as otto in a login shell so nix is on PATH via
