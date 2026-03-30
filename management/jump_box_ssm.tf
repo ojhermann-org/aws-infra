@@ -11,7 +11,7 @@ resource "aws_cloudwatch_log_group" "ssm_sessions" {
 }
 
 # Overrides SSM Session Manager defaults for all sessions on this account.
-# Sets CloudWatch logging and runs sessions as ec2-user (who has the nix environment).
+# Sets CloudWatch logging and runs sessions as otto (who has the nix environment).
 resource "aws_ssm_document" "session_preferences" {
   name            = "SSM-SessionManagerRunShell"
   document_type   = "Session"
@@ -19,14 +19,14 @@ resource "aws_ssm_document" "session_preferences" {
 
   content = jsonencode({
     schemaVersion = "1.0"
-    description   = "Session Manager preferences: CloudWatch logging, run as ec2-user"
+    description   = "Session Manager preferences: CloudWatch logging, run as otto"
     sessionType   = "Standard_Stream"
     inputs = {
       cloudWatchLogGroupName      = aws_cloudwatch_log_group.ssm_sessions.name
       cloudWatchEncryptionEnabled = false
       cloudWatchStreamingEnabled  = true
       runAsEnabled                = true
-      runAsDefaultUser            = "ec2-user"
+      runAsDefaultUser            = "otto"
       shellProfile = {
         linux = "exec bash -l"
       }
