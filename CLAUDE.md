@@ -147,6 +147,7 @@ Guidelines:
 - Run `tofu fmt` before committing
 - Update this file whenever conventions, structure, or account details change
 - Keep CI in sync with the repo: when a new account directory is added, add it to the `plan` matrix in `.github/workflows/ci.yml`
+- **Attachment resources** (security groups, IAM instance profiles, launch templates, RDS/ElastiCache parameter and subnet groups) must use `lifecycle { create_before_destroy = true }` — these block their own deletion while a running resource holds a reference, so OpenTofu must create the replacement before destroying the original to avoid AWS "dependency violation" errors. Use `name_prefix` instead of `name` where AWS allows generated names (security groups, launch templates), so the new resource can be created while the old one still exists. Do not apply this pattern to stateful resources (RDS instances, DynamoDB tables), globally-named resources (S3 buckets, IAM roles), or infrastructure primitives (VPCs, subnets, IGWs) — for those, replacement is a significant event that warrants explicit control
 
 ## Bootstrap sequence
 
