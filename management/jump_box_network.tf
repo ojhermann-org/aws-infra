@@ -60,7 +60,7 @@ resource "aws_route_table_association" "management_public" {
 # Outbound HTTPS is required for the instance to reach SSM endpoints.
 # Outbound SSH is required to connect to external hosts (e.g. GitHub) over SSH.
 resource "aws_security_group" "jump_box" {
-  name        = "shared-sg-jump-box-management"
+  name_prefix = "shared-sg-jump-box-management-"
   description = "Jump box: no inbound; outbound HTTPS for SSM and SSH for git remotes"
   vpc_id      = aws_vpc.management.id
 
@@ -85,5 +85,9 @@ resource "aws_security_group" "jump_box" {
     env        = "management"
     service    = "shared"
     managed-by = "opentofu"
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
