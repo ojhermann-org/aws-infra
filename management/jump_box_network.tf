@@ -58,9 +58,10 @@ resource "aws_route_table_association" "management_public" {
 
 # No inbound rules — access is via SSM only, which does not require open ports.
 # Outbound HTTPS is required for the instance to reach SSM endpoints.
+# Outbound SSH is required to connect to external hosts (e.g. GitHub) over SSH.
 resource "aws_security_group" "jump_box" {
   name        = "shared-sg-jump-box-management"
-  description = "Jump box: no inbound; outbound HTTPS for SSM"
+  description = "Jump box: no inbound; outbound HTTPS for SSM and SSH for git remotes"
   vpc_id      = aws_vpc.management.id
 
   egress {
@@ -69,6 +70,14 @@ resource "aws_security_group" "jump_box" {
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
     description = "HTTPS to SSM endpoints"
+  }
+
+  egress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "SSH to external hosts (e.g. GitHub)"
   }
 
   tags = {
