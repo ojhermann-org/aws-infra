@@ -38,6 +38,12 @@ resource "aws_instance" "jump_box" {
     useradd -m -s /bin/bash otto
     echo 'otto ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/otto
     chmod 440 /etc/sudoers.d/otto
+    # Authorise the local SSH public key so `ssh jump-box` (via SSM proxy) works.
+    mkdir -p /home/otto/.ssh
+    chmod 700 /home/otto/.ssh
+    echo 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAII5hpaZcGtfgHIvJ66KhRwVJmT7KDolQBoF1hBoslsg8 ojhermann@gmail.com' > /home/otto/.ssh/authorized_keys
+    chmod 600 /home/otto/.ssh/authorized_keys
+    chown -R otto:otto /home/otto/.ssh
     # Remove skeleton dotfiles so Home Manager can manage them without conflict.
     rm -f /home/otto/.bash_profile /home/otto/.bashrc
     curl --proto '=https' --tlsv1.2 -sSf -L https://install.determinate.systems/nix \
