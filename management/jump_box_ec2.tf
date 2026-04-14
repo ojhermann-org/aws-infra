@@ -52,6 +52,26 @@ resource "aws_instance" "jump_box" {
     # /etc/profile.d/nix.sh. This fully configures the user environment on first boot.
     sudo -u otto bash -lc \
       'nix run home-manager/master -- switch --flake github:ojhermann-org/home-manager#otto@x86_64-linux --refresh'
+    # Raise the stack hard limit for the otto user to 60 MB (61440 KB).
+    # The default AL2023 hard ceiling (10 MB) is too low for some tooling (e.g. Nix).
+    # PAM limits cover login shells and su sessions; the systemd drop-ins cover
+    # services launched by systemd (including user@.service sessions), which PAM
+    # limits do not reach.
+    mkdir -p /etc/security/limits.d
+    cat > /etc/security/limits.d/90-otto-stack.conf <<'EOF'
+otto hard stack 61440
+otto soft stack 61440
+EOF
+    mkdir -p /etc/systemd/system.conf.d /etc/systemd/user.conf.d
+    cat > /etc/systemd/system.conf.d/stack.conf <<'EOF'
+[Manager]
+DefaultLimitSTACK=62914560
+EOF
+    cat > /etc/systemd/user.conf.d/stack.conf <<'EOF'
+[Manager]
+DefaultLimitSTACK=62914560
+EOF
+    systemctl daemon-reexec
     # Create a 2 GiB swapfile as a safety net for memory spikes during Nix builds.
     fallocate -l 2G /swapfile
     chmod 600 /swapfile
