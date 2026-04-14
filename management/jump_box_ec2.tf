@@ -57,20 +57,16 @@ resource "aws_instance" "jump_box" {
     # PAM limits cover login shells and su sessions; the systemd drop-ins cover
     # services launched by systemd (including user@.service sessions), which PAM
     # limits do not reach.
+    # Note: nested heredocs (<<'EOF') would introduce 0-indented lines that break
+    # HCL's <<-EOT stripping and push the shebang off byte 0; use printf instead.
     mkdir -p /etc/security/limits.d
-    cat > /etc/security/limits.d/90-otto-stack.conf <<'EOF'
-otto hard stack 61440
-otto soft stack 61440
-EOF
+    printf 'otto hard stack 61440\notto soft stack 61440\n' \
+      > /etc/security/limits.d/90-otto-stack.conf
     mkdir -p /etc/systemd/system.conf.d /etc/systemd/user.conf.d
-    cat > /etc/systemd/system.conf.d/stack.conf <<'EOF'
-[Manager]
-DefaultLimitSTACK=62914560
-EOF
-    cat > /etc/systemd/user.conf.d/stack.conf <<'EOF'
-[Manager]
-DefaultLimitSTACK=62914560
-EOF
+    printf '[Manager]\nDefaultLimitSTACK=62914560\n' \
+      > /etc/systemd/system.conf.d/stack.conf
+    printf '[Manager]\nDefaultLimitSTACK=62914560\n' \
+      > /etc/systemd/user.conf.d/stack.conf
     systemctl daemon-reexec
     # Create a 2 GiB swapfile as a safety net for memory spikes during Nix builds.
     fallocate -l 2G /swapfile
